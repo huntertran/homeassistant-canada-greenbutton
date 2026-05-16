@@ -1,0 +1,13 @@
+{
+  "domain": "canada_greenbutton",
+  "name": "Canada GreenButton",
+  "codeowners": ["@huntertran"],
+  "config_flow": true,
+  "dependencies": ["recorder"],
+  "documentation": "https://github.com/huntertran/homeassistant-canada-greenbutton",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/huntertran/homeassistant-canada-greenbutton/issues",
+  "requirements": [],
+  "version": "0.1.0",
+  "single_config_entry": true
+}

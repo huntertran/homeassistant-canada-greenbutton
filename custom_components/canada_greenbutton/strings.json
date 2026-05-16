@@ -1,0 +1,46 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Canada GreenButton",
+        "description": "Configure paths for importing GreenButton XML files.",
+        "data": {
+          "watch_dir": "Watch folder (optional)",
+          "push_statistics": "Push to long-term statistics (Energy dashboard)",
+          "timezone": "Timezone for readings"
+        }
+      }
+    },
+    "error": {
+      "invalid_dir": "Folder does not exist or is not readable."
+    },
+    "abort": {
+      "already_configured": "Canada GreenButton is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Canada GreenButton options",
+        "data": {
+          "watch_dir": "Watch folder",
+          "push_statistics": "Push to long-term statistics",
+          "timezone": "Timezone"
+        }
+      }
+    },
+    "error": {
+      "invalid_dir": "Folder does not exist or is not readable."
+    }
+  },
+  "services": {
+    "import_xml": {
+      "name": "Import GreenButton XML",
+      "description": "Parse a GreenButton XML file and merge it into stored data."
+    },
+    "clear_data": {
+      "name": "Clear data",
+      "description": "Remove stored datasets for one source or all sources."
+    }
+  }
+}

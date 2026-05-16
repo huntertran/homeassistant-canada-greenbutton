@@ -1,0 +1,36 @@
+import_xml:
+  name: Import GreenButton XML
+  description: Parse a GreenButton XML file and merge it into stored data.
+  fields:
+    path:
+      name: File path
+      description: Absolute path to the XML file (must be readable by Home Assistant).
+      required: true
+      example: /config/canada_greenbutton/alectra.xml
+      selector:
+        text:
+    source:
+      name: Source
+      description: Force a parser. Defaults to auto-detect.
+      default: auto
+      selector:
+        select:
+          options:
+            - auto
+            - alectra
+            - enbridge
+            - generic
+
+clear_data:
+  name: Clear data
+  description: Remove stored datasets for one source or all sources.
+  fields:
+    source:
+      name: Source
+      description: If omitted, clears all sources.
+      selector:
+        select:
+          options:
+            - alectra
+            - enbridge
+            - generic

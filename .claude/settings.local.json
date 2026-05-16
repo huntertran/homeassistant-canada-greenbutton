@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem *)",
+      "Bash(git fetch *)",
+      "Bash(python -m compileall -q custom_components/canada_greenbutton/)"
+    ]
+  }
+}
