@@ -3,6 +3,7 @@
  * Renders Alectra TOU + Enbridge gas datasets from sensor `raw_data` attributes.
  */
 (() => {
+  const CARD_VERSION = "0.1.5";
   const CHART_JS_URL = "https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js";
   let chartLoader = null;
 
@@ -63,6 +64,21 @@
       this._render();
     }
 
+    connectedCallback() {
+      // Lovelace may construct cards for inactive views before they are
+      // attached to the DOM. Chart.js measures the canvas at construction
+      // time, so an off-DOM canvas renders 0x0 and stays blank when the
+      // user navigates to the view. Force a fresh render on (re)attach.
+      this._lastSig = "";
+      if (this._chart) { this._chart.destroy(); this._chart = null; }
+      if (this._config) this._render();
+    }
+
+    disconnectedCallback() {
+      if (this._chart) { this._chart.destroy(); this._chart = null; }
+      if (this._heatmapRO) { this._heatmapRO.disconnect(); this._heatmapRO = null; }
+    }
+
     getCardSize() { return 6; }
 
     static getConfigElement() { return document.createElement("canada-greenbutton-card-editor"); }
@@ -118,26 +134,41 @@
     .csv-btn:hover { background: var(--secondary-background-color); }
     .empty { padding: 20px; text-align: center; color: var(--secondary-text-color); }
     .chart-wrap { position: relative; height: 320px; }
+    .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     table.gb { width: 100%; border-collapse: collapse; font-size: 0.9em; }
-    table.gb th, table.gb td { padding: 4px 8px; text-align: right; border-bottom: 1px solid var(--divider-color); }
+    table.gb th, table.gb td { padding: 4px 8px; text-align: right; border-bottom: 1px solid var(--divider-color); white-space: nowrap; }
     table.gb th:first-child, table.gb td:first-child { text-align: left; }
-    table.gb th { background: var(--secondary-background-color); font-weight: 500; }
-    .heatmap { display: grid; grid-template-columns: 40px repeat(24, 1fr); gap: 2px; font-size: 0.7em; }
-    .heatmap .cell { aspect-ratio: 1; border-radius: 2px; }
+    table.gb th { background: var(--secondary-background-color); font-weight: 500; position: sticky; top: 0; }
+    .heatmap-wrap { width: 100%; }
+    .heatmap { display: grid; gap: 2px; font-size: 0.7em; }
+    .heatmap .cell { aspect-ratio: 1; border-radius: 2px; min-width: 0; }
     .heatmap .lbl { color: var(--secondary-text-color); text-align: right; padding-right: 4px; align-self: center; }
     .heatmap .h-lbl { text-align: center; color: var(--secondary-text-color); }
     .filter { display:inline-flex; gap:6px; margin-bottom:8px; }
     .filter button { padding:2px 8px; border:1px solid var(--divider-color); background:var(--card-background-color); color:var(--primary-text-color); cursor:pointer; border-radius:3px; }
     .filter button.active { background: var(--primary-color); color: var(--text-primary-color); }
+    .month-nav { display:flex; align-items:center; gap:6px; margin-bottom:8px; }
+    .month-nav .nav-btn { width:28px; height:28px; padding:0; border:1px solid var(--divider-color); background:var(--card-background-color); color:var(--primary-text-color); cursor:pointer; border-radius:3px; font-size:1.1em; line-height:1; }
+    .month-nav .nav-btn:hover:not(:disabled) { background: var(--secondary-background-color); }
+    .month-nav .nav-btn:disabled { opacity:0.35; cursor:not-allowed; }
+    .month-nav .month-select { flex:1; min-width:0; padding:4px 8px; border:1px solid var(--divider-color); background:var(--card-background-color); color:var(--primary-text-color); border-radius:3px; font-size:0.95em; }
     .delta-up { color: var(--error-color, #d9534f); }
     .delta-down { color: var(--success-color, #5cb85c); }
+    .ver { font-size: 0.7em; color: var(--secondary-text-color); opacity: 0.6; margin-left: 6px; }
   </style>
   <div class="header">
-    <div class="title">${title}</div>
+    <div class="title">${title}${this._config.show_version ? `<span class="ver">v${CARD_VERSION}</span>` : ""}</div>
     ${showCsv ? `<button class="csv-btn" id="csv">Export CSV</button>` : ""}
   </div>
   <div id="body"></div>
 </ha-card>`;
+    }
+
+    _fmtMonth(ym) {
+      // "2026-05" -> "May 2026"
+      const [y, m] = ym.split("-");
+      const idx = parseInt(m, 10) - 1;
+      return `${MONTH_LABELS[idx] || m} ${y}`;
     }
 
     _defaultTitle() {
@@ -156,6 +187,9 @@
     // --- Chart helpers ----------------------------------------------------
     async _drawChart(canvas, config) {
       const Chart = await loadChartJs();
+      // Canvas may have been replaced by a re-render while Chart.js was
+      // loading, or the card may have been detached. Bail in either case.
+      if (!canvas.isConnected) return;
       if (this._chart) { this._chart.destroy(); this._chart = null; }
       this._chart = new Chart(canvas.getContext("2d"), config);
     }
@@ -215,16 +249,29 @@
       if (!days.length) { body.innerHTML = `<div class="empty">No daily data.</div>`; return; }
       // Month picker
       const months = Array.from(new Set(days.map(d => d.date_key.slice(0, 7)))).sort();
+      // Clamp stale selection (e.g. after data reimport removes a month).
+      if (!months.includes(this._selectedMonth)) this._selectedMonth = null;
       const selected = this._selectedMonth || months[months.length - 1];
       this._selectedMonth = selected;
-      const tabs = months.map(m => `<button data-m="${m}" class="${m === selected ? "active" : ""}">${m}</button>`).join("");
-      body.innerHTML = `<div class="filter">${tabs}</div><div class="chart-wrap"><canvas></canvas></div>`;
-      body.querySelectorAll(".filter button").forEach(btn => {
-        btn.addEventListener("click", () => {
-          this._selectedMonth = btn.dataset.m;
-          this._lastSig = ""; this._render();
-        });
-      });
+      const idx = months.indexOf(selected);
+      const prevDisabled = idx <= 0 ? "disabled" : "";
+      const nextDisabled = idx >= months.length - 1 ? "disabled" : "";
+      const options = months.map(m => `<option value="${m}" ${m === selected ? "selected" : ""}>${this._fmtMonth(m)}</option>`).join("");
+      body.innerHTML = `
+        <div class="month-nav">
+          <button class="nav-btn" id="prev-m" ${prevDisabled} aria-label="Previous month">‹</button>
+          <select id="month-select" class="month-select">${options}</select>
+          <button class="nav-btn" id="next-m" ${nextDisabled} aria-label="Next month">›</button>
+        </div>
+        <div class="chart-wrap"><canvas></canvas></div>`;
+      const go = (m) => {
+        if (!m || m === this._selectedMonth) return;
+        this._selectedMonth = m;
+        this._lastSig = ""; this._render();
+      };
+      body.querySelector("#month-select").addEventListener("change", e => go(e.target.value));
+      body.querySelector("#prev-m").addEventListener("click", () => go(months[idx - 1]));
+      body.querySelector("#next-m").addEventListener("click", () => go(months[idx + 1]));
       const monthDays = days.filter(d => d.date_key.startsWith(selected));
       this._drawChart(body.querySelector("canvas"), {
         type: "bar",
@@ -253,24 +300,60 @@
       if (!grid || !grid.cells || !grid.cells.length) {
         body.innerHTML = `<div class="empty">No hourly readings.</div>`; return;
       }
-      const max = grid.max || 1;
+      body.innerHTML = `<div class="heatmap-wrap"></div>`;
+      const wrap = body.querySelector(".heatmap-wrap");
+      const draw = () => this._drawHeatmap(wrap, grid);
+      draw();
+      // Re-render on width change so bucket count adapts.
+      if (this._heatmapRO) this._heatmapRO.disconnect();
+      this._heatmapRO = new ResizeObserver(() => {
+        const desired = this._heatmapBuckets(wrap.clientWidth);
+        if (desired !== this._heatmapLastBuckets) draw();
+      });
+      this._heatmapRO.observe(wrap);
+    }
+
+    _heatmapBuckets(width) {
+      // Pick bucket count so each cell stays >= ~14px wide.
+      // 24h needs ~ 24*14 + label = 370px; 12h needs ~ 12*14 + label = 200px.
+      if (width >= 370) return 24;
+      if (width >= 200) return 12;
+      if (width >= 130) return 8;
+      return 6;
+    }
+
+    _drawHeatmap(wrap, grid) {
+      const width = wrap.clientWidth || 320;
+      const buckets = this._heatmapBuckets(width);
+      this._heatmapLastBuckets = buckets;
+      const hoursPerBucket = 24 / buckets;
+      const max = (grid.max || 1) * hoursPerBucket; // bucket sums scale
       const dows = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-      let html = `<div class="heatmap"><div></div>`;
-      for (let h = 0; h < 24; h++) html += `<div class="h-lbl">${h}</div>`;
+      const labelCol = 32;
+      let html = `<div class="heatmap" style="grid-template-columns: ${labelCol}px repeat(${buckets}, minmax(0, 1fr));"><div></div>`;
+      for (let b = 0; b < buckets; b++) {
+        const hStart = Math.round(b * hoursPerBucket);
+        const hEnd = Math.round((b + 1) * hoursPerBucket) - 1;
+        const label = hoursPerBucket === 1 ? `${hStart}` : `${hStart}-${hEnd}`;
+        html += `<div class="h-lbl">${label}</div>`;
+      }
       for (let d = 0; d < 7; d++) {
         html += `<div class="lbl">${dows[d]}</div>`;
-        for (let h = 0; h < 24; h++) {
-          const v = grid.cells[d][h] || 0;
-          const intensity = v / max;
-          // dark-slate → yellow gradient
+        for (let b = 0; b < buckets; b++) {
+          const hStart = Math.round(b * hoursPerBucket);
+          const hEnd = Math.round((b + 1) * hoursPerBucket);
+          let v = 0;
+          for (let h = hStart; h < hEnd; h++) v += grid.cells[d][h] || 0;
+          const intensity = Math.min(1, v / max);
           const r = Math.round(40 + intensity * 215);
           const g = Math.round(50 + intensity * 195);
-          const b = Math.round(80 - intensity * 80);
-          html += `<div class="cell" title="${dows[d]} ${h}:00 — ${v.toFixed(2)} kWh" style="background:rgb(${r},${g},${b})"></div>`;
+          const bl = Math.round(80 - intensity * 80);
+          const labelRange = hoursPerBucket === 1 ? `${hStart}:00` : `${hStart}:00-${hEnd - 1}:59`;
+          html += `<div class="cell" title="${dows[d]} ${labelRange} — ${v.toFixed(2)} kWh" style="background:rgb(${r},${g},${bl})"></div>`;
         }
       }
       html += `</div>`;
-      body.innerHTML = html;
+      wrap.innerHTML = html;
     }
 
     _renderYoy(body, raw) {
@@ -287,7 +370,7 @@
       if (sortedYears.length < 2) {
         body.innerHTML = `<div class="empty">Need ≥2 years of data for YoY.</div>`; return;
       }
-      let html = `<table class="gb"><thead><tr><th>Month</th>`;
+      let html = `<div class="table-wrap"><table class="gb"><thead><tr><th>Month</th>`;
       sortedYears.forEach(y => { html += `<th>${y}</th>`; });
       html += `<th>Δ</th></tr></thead><tbody>`;
       for (let m = 1; m <= 12; m++) {
@@ -306,7 +389,7 @@
         }
         html += `<td>${delta}</td></tr>`;
       }
-      html += `</tbody></table>`;
+      html += `</tbody></table></div>`;
       body.innerHTML = html;
     }
 
@@ -314,7 +397,7 @@
       const periods = raw.billing_periods || [];
       if (!periods.length) { body.innerHTML = `<div class="empty">No billing periods.</div>`; return; }
       const isAlectra = "usage_kwh" in (periods[0] || {});
-      let html = `<table class="gb"><thead><tr><th>Period</th>`;
+      let html = `<div class="table-wrap"><table class="gb"><thead><tr><th>Period</th>`;
       if (isAlectra) {
         html += `<th>kWh</th><th>Delivery</th><th>Regulatory</th><th>HST</th><th>OER</th><th>Total</th>`;
       } else {
@@ -329,7 +412,7 @@
           html += `<tr><td>${label}</td><td>${p.usage_cubic_meters.toFixed(1)}</td><td>${p.gas_supply_cad.toFixed(2)}</td><td>${p.gas_delivery_cad.toFixed(2)}</td><td>${p.carbon_cad.toFixed(2)}</td><td>${p.hst_cad.toFixed(2)}</td><td>${p.total_bill_cad.toFixed(2)}</td></tr>`;
         }
       });
-      html += `</tbody></table>`;
+      html += `</tbody></table></div>`;
       body.innerHTML = html;
     }
 
@@ -397,6 +480,12 @@
 
   customElements.define("canada-greenbutton-card", CanadaGreenButtonCard);
   customElements.define("canada-greenbutton-card-editor", CanadaGreenButtonCardEditor);
+
+  console.info(
+    `%c canada-greenbutton-card %c v${CARD_VERSION} `,
+    "color:#fff;background:#1976d2;font-weight:700;border-radius:3px 0 0 3px;padding:2px 4px;",
+    "color:#1976d2;background:#fff;font-weight:700;border-radius:0 3px 3px 0;padding:2px 4px;border:1px solid #1976d2;"
+  );
 
   window.customCards = window.customCards || [];
   window.customCards.push({
