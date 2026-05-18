@@ -19,7 +19,7 @@ Env vars (required):
 
 Optional:
     ALECTRA_LOGIN_URL          override
-    ALECTRA_LOOKBACK_DAYS=400  how far back the From Date goes; default 400
+    ALECTRA_LOOKBACK_DAYS=14  how far back the From Date goes; default 14
     HEADLESS=0                 run headed for local debug
     SAVE_LOCAL=/path           also write XML to this path
 """
@@ -46,7 +46,7 @@ LOGIN_URL = os.environ.get(
     "https://alectrautilitiesgbportal.savagedata.com/Connect/Authorize"
     "?returnUrl=https%3A%2F%2Falectrautilitiesgbportal.savagedata.com%2F",
 )
-LOOKBACK_DAYS = int(os.environ.get("ALECTRA_LOOKBACK_DAYS", "400"))
+LOOKBACK_DAYS = int(os.environ.get("ALECTRA_LOOKBACK_DAYS", "14"))
 DIAG_DIR = Path(__file__).parent / "_diag"
 
 

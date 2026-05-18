@@ -34,35 +34,18 @@ jobs:
       - name: Install Python deps
         run: pip install -r requirements.txt
 
-      # - name: Install Playwright Chromium
-      #   run: python -m playwright install --with-deps chromium
+      - name: Install Playwright Chromium
+        run: python -m playwright install --with-deps chromium
 
-      # - name: Run Alectra fetcher
-      #   env:
-      #     ALECTRA_ACCOUNT_NAME: ${{ secrets.ALECTRA_ACCOUNT_NAME }}
-      #     ALECTRA_ACCOUNT_NUMBER: ${{ secrets.ALECTRA_ACCOUNT_NUMBER }}
-      #     ALECTRA_PHONE: ${{ secrets.ALECTRA_PHONE }}
-      #     ALECTRA_METER_ID: ${{ secrets.ALECTRA_METER_ID }}
-      #     HA_BASE_URL: ${{ secrets.HA_BASE_URL }}
-      #     HA_TOKEN: ${{ secrets.HA_TOKEN }}
-      #   run: python fetch_alectra.py
-
-      - name: Upload test.xml to HA
+      - name: Run Alectra fetcher
         env:
+          ALECTRA_ACCOUNT_NAME: ${{ secrets.ALECTRA_ACCOUNT_NAME }}
+          ALECTRA_ACCOUNT_NUMBER: ${{ secrets.ALECTRA_ACCOUNT_NUMBER }}
+          ALECTRA_PHONE: ${{ secrets.ALECTRA_PHONE }}
+          ALECTRA_METER_ID: ${{ secrets.ALECTRA_METER_ID }}
           HA_BASE_URL: ${{ secrets.HA_BASE_URL }}
           HA_TOKEN: ${{ secrets.HA_TOKEN }}
-          WORKSPACE: ${{ github.workspace }}
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          import os, sys
-          ws = Path(os.environ["WORKSPACE"])
-          sys.path.insert(0, str(ws / "fetch_data"))
-          from ha_upload import post_xml
-          xml = (ws / "test.xml").read_bytes()
-          result = post_xml(xml, source="test.xml")
-          print("HA response:", result)
-          PY
+        run: python fetch_alectra.py
 
       - name: Upload diagnostics on failure
         if: failure()
