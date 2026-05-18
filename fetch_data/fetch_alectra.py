@@ -26,7 +26,9 @@ Optional:
 from __future__ import annotations
 
 import asyncio
+import asyncio
 import os
+import random
 import re
 import sys
 import time
@@ -66,6 +68,11 @@ def _date_range() -> tuple[str, str]:
     start = today - timedelta(days=LOOKBACK_DAYS)
     fmt = lambda d: f"{d.month}/{d.day}/{d.year}"
     return fmt(start), fmt(today)
+
+
+async def _human_pause() -> None:
+    """Random think-time between UI interactions to look less bot-like."""
+    await asyncio.sleep(random.uniform(0.5, 2.0))
 
 
 async def _save_diag(page: Page, label: str) -> None:
@@ -113,29 +120,43 @@ async def run() -> int:
 
             # Click-before-fill — Blazor form needs the focus event to wire up
             await name_box.click()
+            await _human_pause()
             await name_box.fill(account_name)
+            await _human_pause()
             await number_box.click()
+            await _human_pause()
             await number_box.fill(account_number)
+            await _human_pause()
             await phone_box.click()
+            await _human_pause()
             await phone_box.fill(phone)
+            await _human_pause()
 
             await _save_diag(page, "before_signin")
             await page.get_by_text("Sign In", exact=True).click()
+            await _human_pause()
 
             # Landing page → single link leads to the data download page
             await page.wait_for_load_state("networkidle", timeout=45_000)
             await _save_diag(page, "after_signin")
             await page.get_by_role("link").first.click()
+            await _human_pause()
 
             await page.wait_for_load_state("networkidle", timeout=45_000)
             await page.get_by_role("textbox", name="From Date:").fill(from_date)
+            await _human_pause()
             await page.get_by_role("textbox", name="To Date:").fill(to_date)
+            await _human_pause()
             # Blur date field so the row table refreshes; click body to dismiss any picker
             await page.locator("body").click(position={"x": 1, "y": 1})
+            await _human_pause()
 
             await page.get_by_text("Electricity Usage Data").click()
+            await _human_pause()
             await page.get_by_text("Billing Data").click()
+            await _human_pause()
             await page.get_by_text("Account Information").click()
+            await _human_pause()
 
             async with page.expect_download(timeout=120_000) as dl_info:
                 await page.get_by_role("row", name=meter_id).get_by_role("button").click()

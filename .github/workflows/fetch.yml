@@ -7,7 +7,7 @@ on:
 
 env:
   ALECTRA_LOGIN_URL: https://alectrautilitiesgbportal.savagedata.com/Connect/Authorize?returnUrl=https%3A%2F%2Falectrautilitiesgbportal.savagedata.com%2F
-  ALECTRA_LOOKBACK_DAYS: "400"
+  ALECTRA_LOOKBACK_DAYS: "14"
 
 jobs:
   alectra:
