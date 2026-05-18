@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug fetch_alectra.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/fetch_data/fetch_alectra.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/fetch_data",
+            "python": "${workspaceFolder}/fetch_data/.venv/Scripts/python.exe",
+            "justMyCode": false
+        }
+    ]
+}

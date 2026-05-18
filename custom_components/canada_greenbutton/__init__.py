@@ -31,6 +31,7 @@ from .const import (
     WATCH_INTERVAL_S,
 )
 from .coordinator import GreenButtonCoordinator
+from .http_view import GreenButtonUploadView
 from .parser import parse_xml
 from .statistics import push_alectra_statistics, push_enbridge_statistics
 from .store import GreenButtonStore
@@ -65,6 +66,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
+    # Resolve effective watch dir: explicit option > default under HA config
+    watch_dir_opt = (entry.options.get(CONF_WATCH_DIR) or "").strip()
+    watch_dir = Path(watch_dir_opt) if watch_dir_opt else Path(hass.config.path(IMPORT_DIR))
+    await hass.async_add_executor_job(lambda: watch_dir.mkdir(parents=True, exist_ok=True))
+
+    # Register HTTP upload endpoint for external fetchers (GitHub Actions etc.)
+    hass.http.register_view(GreenButtonUploadView(hass, watch_dir))
+
     async def _import_one(path: str, source: str) -> dict[str, Any]:
         if not os.path.isfile(path):
             raise HomeAssistantError(f"File not found: {path}")
@@ -97,30 +106,30 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.services.async_register(DOMAIN, SERVICE_IMPORT_XML, handle_import, schema=IMPORT_SCHEMA)
     hass.services.async_register(DOMAIN, SERVICE_CLEAR_DATA, handle_clear, schema=CLEAR_SCHEMA)
 
-    # Folder watcher
-    watch_dir = (entry.options.get(CONF_WATCH_DIR) or "").strip()
-    if watch_dir and os.path.isdir(watch_dir):
-        async def _scan(_now=None) -> None:
-            try:
-                for name in os.listdir(watch_dir):
-                    if not name.lower().endswith(".xml"):
-                        continue
-                    fpath = os.path.join(watch_dir, name)
-                    try:
-                        await _import_one(fpath, SOURCE_AUTO)
-                        os.rename(fpath, fpath + ".imported")
-                    except Exception as err:  # noqa: BLE001
-                        _LOGGER.exception("Import failed for %s: %s", fpath, err)
-                        try:
-                            os.rename(fpath, fpath + ".failed")
-                        except OSError:
-                            pass
-            except FileNotFoundError:
-                _LOGGER.warning("Watch dir disappeared: %s", watch_dir)
+    # Folder watcher — runs against the resolved watch_dir (option or default)
+    watch_dir_str = str(watch_dir)
 
-        unsub = async_track_time_interval(hass, _scan, timedelta(seconds=WATCH_INTERVAL_S))
-        hass.data[DOMAIN][entry.entry_id]["watch_unsub"] = unsub
-        hass.async_create_task(_scan())
+    async def _scan(_now=None) -> None:
+        try:
+            for name in os.listdir(watch_dir_str):
+                if not name.lower().endswith(".xml"):
+                    continue
+                fpath = os.path.join(watch_dir_str, name)
+                try:
+                    await _import_one(fpath, SOURCE_AUTO)
+                    os.rename(fpath, fpath + ".imported")
+                except Exception as err:  # noqa: BLE001
+                    _LOGGER.exception("Import failed for %s: %s", fpath, err)
+                    try:
+                        os.rename(fpath, fpath + ".failed")
+                    except OSError:
+                        pass
+        except FileNotFoundError:
+            _LOGGER.warning("Watch dir disappeared: %s", watch_dir_str)
+
+    unsub = async_track_time_interval(hass, _scan, timedelta(seconds=WATCH_INTERVAL_S))
+    hass.data[DOMAIN][entry.entry_id]["watch_unsub"] = unsub
+    hass.async_create_task(_scan())
 
     entry.async_on_unload(entry.add_update_listener(_update_listener))
     return True

@@ -1,0 +1,73 @@
+name: fetch
+
+on:
+  schedule:
+    - cron: "0 11 * * 1"   # weekly: Monday 11:00 UTC (06:00 EST / 07:00 EDT)
+  workflow_dispatch: {}
+
+env:
+  ALECTRA_LOGIN_URL: https://alectrautilitiesgbportal.savagedata.com/Connect/Authorize?returnUrl=https%3A%2F%2Falectrautilitiesgbportal.savagedata.com%2F
+  ALECTRA_LOOKBACK_DAYS: "400"
+
+jobs:
+  alectra:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: fetch_data
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: fetch_data/requirements.txt
+
+      - name: Install Python deps
+        run: pip install -r requirements.txt
+
+      # - name: Install Playwright Chromium
+      #   run: python -m playwright install --with-deps chromium
+
+      # - name: Run Alectra fetcher
+      #   env:
+      #     ALECTRA_ACCOUNT_NAME: ${{ secrets.ALECTRA_ACCOUNT_NAME }}
+      #     ALECTRA_ACCOUNT_NUMBER: ${{ secrets.ALECTRA_ACCOUNT_NUMBER }}
+      #     ALECTRA_PHONE: ${{ secrets.ALECTRA_PHONE }}
+      #     ALECTRA_METER_ID: ${{ secrets.ALECTRA_METER_ID }}
+      #     HA_BASE_URL: ${{ secrets.HA_BASE_URL }}
+      #     HA_TOKEN: ${{ secrets.HA_TOKEN }}
+      #   run: python fetch_alectra.py
+
+      - name: Upload test.xml to HA
+        env:
+          HA_BASE_URL: ${{ secrets.HA_BASE_URL }}
+          HA_TOKEN: ${{ secrets.HA_TOKEN }}
+        working-directory: ${{ github.workspace }}
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import sys
+          sys.path.insert(0, "fetch_data")
+          from ha_upload import post_xml
+          xml = Path("test.xml").read_bytes()
+          result = post_xml(xml, source="test.xml")
+          print("HA response:", result)
+          PY
+
+      - name: Upload diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagnostics-${{ github.run_id }}
+          path: fetch_data/_diag/
+          if-no-files-found: ignore
+          retention-days: 7

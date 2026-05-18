@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Env / secrets
+.env
+.env.local
+*.env
+
+# GreenButton sample data
+test.xml
+*.xml.local
+
+# IDE
+.vscode/*
+!.vscode/launch.json
+!.vscode/settings.json
+
+# OS
+.DS_Store
+Thumbs.db
