@@ -51,14 +51,15 @@ jobs:
         env:
           HA_BASE_URL: ${{ secrets.HA_BASE_URL }}
           HA_TOKEN: ${{ secrets.HA_TOKEN }}
-        working-directory: ${{ github.workspace }}
+          WORKSPACE: ${{ github.workspace }}
         run: |
           python - <<'PY'
           from pathlib import Path
-          import sys
-          sys.path.insert(0, "fetch_data")
+          import os, sys
+          ws = Path(os.environ["WORKSPACE"])
+          sys.path.insert(0, str(ws / "fetch_data"))
           from ha_upload import post_xml
-          xml = Path("test.xml").read_bytes()
+          xml = (ws / "test.xml").read_bytes()
           result = post_xml(xml, source="test.xml")
           print("HA response:", result)
           PY
