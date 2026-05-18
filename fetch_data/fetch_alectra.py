@@ -124,6 +124,7 @@ async def run() -> int:
 
             # Landing page → single link leads to the data download page
             await page.wait_for_load_state("networkidle", timeout=45_000)
+            await _save_diag(page, "after_signin")
             await page.get_by_role("link").first.click()
 
             await page.wait_for_load_state("networkidle", timeout=45_000)
