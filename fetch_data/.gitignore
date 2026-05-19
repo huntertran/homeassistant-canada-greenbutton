@@ -1,4 +1,6 @@
 .env.local
+*.local.md
+*.local.txt
 _diag/
 __pycache__/
 *.pyc

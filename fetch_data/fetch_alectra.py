@@ -38,6 +38,8 @@ from pathlib import Path
 
 from playwright.async_api import async_playwright, Page, TimeoutError as PWTimeout
 
+import alectra_parser
+import drive_upload
 import ha_upload
 from env_local import load_env_local
 
@@ -172,6 +174,23 @@ async def run() -> int:
 
             result = ha_upload.post_xml(xml_bytes, source="alectra")
             print(f"Uploaded {len(xml_bytes)} bytes → {result.get('path')}")
+
+            if os.environ.get("GDRIVE_REFRESH_TOKEN"):
+                try:
+                    from datetime import timezone as _tz
+                    payload = alectra_parser.parse_xml(xml_bytes)
+                    payload["savedAt"] = datetime.now(_tz.utc).strftime(
+                        "%Y-%m-%dT%H:%M:%S.000Z"
+                    )
+                    drive_result = drive_upload.upload_json(payload)
+                    print(
+                        f"Drive sync: {drive_result.get('name')} "
+                        f"id={drive_result.get('id')} "
+                        f"modified={drive_result.get('modifiedTime')}"
+                    )
+                except Exception as drive_err:  # noqa: BLE001
+                    print(f"Drive upload failed (non-fatal): {drive_err}", file=sys.stderr)
+
             return 0
 
         except (PWTimeout, Exception) as err:  # noqa: BLE001

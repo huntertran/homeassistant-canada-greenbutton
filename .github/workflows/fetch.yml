@@ -45,6 +45,10 @@ jobs:
           ALECTRA_METER_ID: ${{ secrets.ALECTRA_METER_ID }}
           HA_BASE_URL: ${{ secrets.HA_BASE_URL }}
           HA_TOKEN: ${{ secrets.HA_TOKEN }}
+          GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
+          GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
+          GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
+          GDRIVE_FILE_NAME: ${{ vars.GDRIVE_FILE_NAME }}
         run: python fetch_alectra.py
 
       - name: Upload diagnostics on failure
