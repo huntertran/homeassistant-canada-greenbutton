@@ -13,7 +13,7 @@ Usage:
     python setup_drive_oauth.py
 
 What happens:
-    1. A small local HTTP server starts on http://localhost:8765/.
+    1. A small local HTTP server starts on http://127.0.0.1:8765/.
     2. Your default browser opens to Google's consent screen.
     3. You sign in with the SAME Google account you use in the
        visualizer (appDataFolder is per-user-per-client).
@@ -23,7 +23,7 @@ What happens:
 Prerequisites (one-time GCP Console work):
     - In the visualizer's OAuth client (Credentials → OAuth 2.0 Client
       IDs → the "Web application" client), add an Authorized redirect
-      URI:  http://localhost:8765/
+      URI:  http://127.0.0.1:8765/
     - Make sure the OAuth consent screen has scope
       ``https://www.googleapis.com/auth/drive.appdata`` enabled and
       your Google account is listed as a Test user (or the app is
@@ -40,7 +40,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import requests
 
-REDIRECT = "http://localhost:8765/"
+REDIRECT = "http://127.0.0.1:8765/"
 AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 TOKEN_URL = "https://oauth2.googleapis.com/token"
 SCOPE = "https://www.googleapis.com/auth/drive.appdata"
@@ -85,7 +85,7 @@ def main() -> int:
     print(f"Opening browser:\n  {url}\n")
     webbrowser.open(url)
 
-    server = HTTPServer(("localhost", 8765), _Handler)
+    server = HTTPServer(("127.0.0.1", 8765), _Handler)
     while "code" not in _Handler.captured and "error" not in _Handler.captured:
         server.handle_request()
     server.server_close()
