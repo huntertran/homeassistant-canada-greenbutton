@@ -1,17 +1,18 @@
 """Python port of AlectraParserService from green-button-visualizer.
 
-Produces the same JSON shape the visualizer's loadAppData expects:
+Produces the JSON shape the visualizer's loadAppData expects:
     {
-        "billingPeriods": [{start, end, totalBillCAD, usageKwh,
-                            deliveryCAD, regulatoryCAD, hstCAD,
-                            ontarioRebateCAD}],
-        "monthlyTou":     [{label, year, month, offPeakKwh,
-                            midPeakKwh, onPeakKwh, totalKwh}],
-        "dailySummaries": [{date, dateKey, kwh, onPeakKwh,
-                            midPeakKwh, offPeakKwh}],
+        "billingPeriods": [...],
+        "monthlyTou":     [...],
+        "dailySummaries": [...],
         "heatmapGrid":    {cells: number[7][24], max: number},
+        "hourlyReadings": [{ts, kwh, tou}],   # raw, used for cross-run merge
         "savedAt":        ISO-8601 timestamp,
     }
+
+``hourlyReadings`` is the source of truth across runs.  ``drive_upload``
+merges that array by ``ts``, then re-runs :func:`aggregate_hourly` so the
+aggregate fields stay consistent.
 
 Dates are emitted as ISO-8601 UTC strings — the visualizer rehydrates
 with ``new Date(...)`` which accepts that format.
@@ -23,7 +24,7 @@ produces when a Toronto user loads the same XML in the browser.
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Iterator
+from typing import Iterable, Iterator
 from xml.etree import ElementTree as ET
 from zoneinfo import ZoneInfo
 
@@ -82,7 +83,12 @@ def _label_short(dt: datetime) -> str:
     return f"{MONTH_ABBR[dt.month - 1]} {dt.strftime('%y')}"
 
 
-def _extract_hourly(root: ET.Element) -> tuple[list[dict], list[dict], dict]:
+def _extract_hourly_readings(root: ET.Element) -> list[dict]:
+    """Return list of {ts, kwh, tou} for every 3600s IntervalReading.
+
+    ``ts`` is the UNIX epoch second of the reading's start time. Acts as
+    the merge key across runs.
+    """
     reading_multiplier = 0
     for entry in _iter_by_local(root, "entry"):
         rt = _first_by_local(entry, "ReadingType")
@@ -96,79 +102,95 @@ def _extract_hourly(root: ET.Element) -> tuple[list[dict], list[dict], dict]:
             break
     to_kwh = (10 ** reading_multiplier) / 1000
 
-    month_map: dict[str, dict] = {}
-    day_map: dict[str, dict] = {}
-    heat_raw = [[{"total": 0.0, "count": 0} for _ in range(24)] for _ in range(7)]
-
+    readings: list[dict] = []
     for entry in _iter_by_local(root, "entry"):
         block = _first_by_local(entry, "IntervalBlock")
         if block is None:
             continue
-
         for r in _iter_by_local(block, "IntervalReading"):
             tp = _first_by_local(r, "timePeriod")
             if tp is None or _child_int(tp, "duration") != 3600:
                 continue
-
             start_ts = _child_int(tp, "start")
             value = _child_int(r, "value")
             tou = _child_int(r, "tou")
             if start_ts is None or value is None or tou is None:
                 continue
+            readings.append({
+                "ts": start_ts,
+                "kwh": value * to_kwh,
+                "tou": tou,
+            })
+    return readings
 
-            dt = _ts_to_local(start_ts)
-            kwh = value * to_kwh
-            year = dt.year
-            month0 = dt.month - 1  # 0-indexed to match JS getMonth()
-            hour = dt.hour
-            # JS getDay(): Sun=0..Sat=6.  Python weekday(): Mon=0..Sun=6
-            dow = (dt.weekday() + 1) % 7
 
-            month_key = f"{year}-{month0:02d}"
-            me = month_map.get(month_key)
-            if me is None:
-                me = {
-                    "label": _label_short(dt),
-                    "year": year,
-                    "month": month0,
-                    "offPeakKwh": 0.0,
-                    "midPeakKwh": 0.0,
-                    "onPeakKwh": 0.0,
-                    "totalKwh": 0.0,
-                }
-                month_map[month_key] = me
-            if tou == 3:
-                me["offPeakKwh"] += kwh
-            elif tou == 2:
-                me["midPeakKwh"] += kwh
-            elif tou == 1:
-                me["onPeakKwh"] += kwh
-            me["totalKwh"] += kwh
+def aggregate_hourly(
+    readings: Iterable[dict],
+) -> tuple[list[dict], list[dict], dict]:
+    """Recompute monthlyTou + dailySummaries + heatmapGrid from raw hourly.
 
-            day_key = f"{year}-{dt.month:02d}-{dt.day:02d}"
-            de = day_map.get(day_key)
-            if de is None:
-                midnight = datetime(year, dt.month, dt.day, tzinfo=LOCAL_TZ)
-                de = {
-                    "date": _iso_utc(midnight),
-                    "dateKey": day_key,
-                    "kwh": 0.0,
-                    "onPeakKwh": 0.0,
-                    "midPeakKwh": 0.0,
-                    "offPeakKwh": 0.0,
-                }
-                day_map[day_key] = de
-            de["kwh"] += kwh
-            if tou == 1:
-                de["onPeakKwh"] += kwh
-            elif tou == 2:
-                de["midPeakKwh"] += kwh
-            elif tou == 3:
-                de["offPeakKwh"] += kwh
+    Pure function: same inputs → same outputs. Called by parser on the
+    fresh XML payload and by the uploader on the merged hourly list.
+    """
+    month_map: dict[str, dict] = {}
+    day_map: dict[str, dict] = {}
+    heat_raw = [[{"total": 0.0, "count": 0} for _ in range(24)] for _ in range(7)]
 
-            cell = heat_raw[dow][hour]
-            cell["total"] += kwh
-            cell["count"] += 1
+    for r in readings:
+        start_ts = r["ts"]
+        kwh = r["kwh"]
+        tou = r["tou"]
+        dt = _ts_to_local(start_ts)
+        year = dt.year
+        month0 = dt.month - 1
+        hour = dt.hour
+        dow = (dt.weekday() + 1) % 7  # JS getDay(): Sun=0..Sat=6
+
+        month_key = f"{year}-{month0:02d}"
+        me = month_map.get(month_key)
+        if me is None:
+            me = {
+                "label": _label_short(dt),
+                "year": year,
+                "month": month0,
+                "offPeakKwh": 0.0,
+                "midPeakKwh": 0.0,
+                "onPeakKwh": 0.0,
+                "totalKwh": 0.0,
+            }
+            month_map[month_key] = me
+        if tou == 3:
+            me["offPeakKwh"] += kwh
+        elif tou == 2:
+            me["midPeakKwh"] += kwh
+        elif tou == 1:
+            me["onPeakKwh"] += kwh
+        me["totalKwh"] += kwh
+
+        day_key = f"{year}-{dt.month:02d}-{dt.day:02d}"
+        de = day_map.get(day_key)
+        if de is None:
+            midnight = datetime(year, dt.month, dt.day, tzinfo=LOCAL_TZ)
+            de = {
+                "date": _iso_utc(midnight),
+                "dateKey": day_key,
+                "kwh": 0.0,
+                "onPeakKwh": 0.0,
+                "midPeakKwh": 0.0,
+                "offPeakKwh": 0.0,
+            }
+            day_map[day_key] = de
+        de["kwh"] += kwh
+        if tou == 1:
+            de["onPeakKwh"] += kwh
+        elif tou == 2:
+            de["midPeakKwh"] += kwh
+        elif tou == 3:
+            de["offPeakKwh"] += kwh
+
+        cell = heat_raw[dow][hour]
+        cell["total"] += kwh
+        cell["count"] += 1
 
     cells = [
         [
@@ -247,14 +269,16 @@ def _extract_billing(root: ET.Element) -> list[dict]:
 def parse_xml(xml_bytes: bytes) -> dict:
     """Parse Alectra GreenButton XML → visualizer-ready dict.
 
-    The returned dict is JSON-serializable with stdlib ``json.dumps``.
+    Includes raw ``hourlyReadings`` so the uploader can merge across runs.
     Caller appends ``savedAt`` before uploading to Drive.
     """
     root = ET.fromstring(xml_bytes)
-    monthly_tou, daily, heatmap = _extract_hourly(root)
+    hourly = _extract_hourly_readings(root)
+    monthly_tou, daily, heatmap = aggregate_hourly(hourly)
     return {
         "billingPeriods": _extract_billing(root),
         "monthlyTou": monthly_tou,
         "dailySummaries": daily,
         "heatmapGrid": heatmap,
+        "hourlyReadings": hourly,
     }
