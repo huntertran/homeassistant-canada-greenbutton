@@ -5,7 +5,11 @@
       "Bash(git fetch *)",
       "Bash(python -m compileall -q custom_components/canada_greenbutton/)",
       "Bash(powershell *)",
-      "Bash(git check-ignore *)"
+      "Bash(git check-ignore *)",
+      "Bash(python -c \"import alectra_parser, drive_upload; print\\('ok'\\)\")",
+      "Bash(.venv\\\\Scripts\\\\python.exe -m playwright codegen --output enbridge_recorded.py https://www.enbridgegas.com/en-ca/account-and-billing/my-account)",
+      "PowerShell(D:\\\\Projects\\\\homeassistant-canada-greenbutton\\\\fetch_data\\\\.venv\\\\Scripts\\\\python.exe -m playwright --version)",
+      "PowerShell(Set-Location D:\\\\Projects\\\\homeassistant-canada-greenbutton\\\\fetch_data; $env:SAVE_LOCAL=\"./enbridge_sample.xml\"; .\\\\.venv\\\\Scripts\\\\python.exe fetch_enbridge.py 2>&1)"
     ]
   }
 }

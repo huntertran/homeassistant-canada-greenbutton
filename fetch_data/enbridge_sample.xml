@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:espi="http://naesb.org/espi"
+      xsi:schemaLocation="http://www.w3.org/2005/Atom https://greenbuttondata.org/xsd/3_3/atom.xsd http://naesb.org/espi https://www.naesb.org/espi.xsd">
+   <id>urn:uuid:1a2b3c4d-feed-5abc-8def-260601043720</id>
+   <title>Energy Usage</title>
+   <updated>2026-06-01T04:37:20Z</updated>
+   <link rel="related"
+         href="https://cert.greenbuttonalliance.org/certificate/88ab910e-9ef1-5a97-84bf-2e354b8b4d5c"
+         type="text/html"/>
+   <entry>
+      <content>
+         <espi:LocalTimeParameters>
+            <espi:dstEndRule/>
+            <espi:dstOffset/>
+            <espi:dstStartRule/>
+            <espi:tzOffset/>
+         </espi:LocalTimeParameters>
+      </content>
+      <id>urn:uuid:1a2b3c4d-caea-5abc-8def-000000002026</id>
+      <title>DST For North America</title>
+      <published>2026-06-01T04:37:20Z</published>
+      <updated>2026-06-01T04:37:20Z</updated>
+      <link rel="self"
+            href="https://api.enbridgegas.com/espi/1_1/resource/LocalTimeParameters/002026"
+            type="espi-entry/LocalTimeParameters"/>
+      <link rel="up"
+            href="https://api.enbridgegas.com/espi/1_1/resource/LocalTimeParameters"
+            type="espi-feed/LocalTimeParameters"/>
+   </entry>
+   <entry>
+      <content>
+         <espi:UsagePoint>
+            <espi:ServiceCategory>
+               <espi:kind>1</espi:kind>
+            </espi:ServiceCategory>
+         </espi:UsagePoint>
+      </content>
+      <id>urn:uuid:647FC2D4-44D0-53ED-ADB0-175644B8C612</id>
+      <title>Usage Point</title>
+      <published>2026-06-01T04:37:20Z</published>
+      <updated>2026-06-01T04:37:20Z</updated>
+      <link rel="self"
+            href="https://api.enbridgegas.com/espi/1_1/resource/Subscription/00uslj14zbgyTaiAp697/UsagePoint/647FC2D4-44D0-53ED-ADB0-175644B8C612"
+            type="espi-entry/UsagePoint"/>
+      <link rel="up"
+            href="https://api.enbridgegas.com/espi/1_1/resource/Subscription/00uslj14zbgyTaiAp697/UsagePoint"
+            type="espi-feed/UsagePoint"/>
+      <link rel="related"
+            href="https://api.enbridgegas.com/espi/1_1/resource/LocalTimeParameters/002026"
+            type="espi-entry/LocalTimeParameters"/>
+      <link rel="related"
+            href="https://api.enbridgegas.com/espi/1_1/resource/Subscription/00uslj14zbgyTaiAp697/UsagePoint/647FC2D4-44D0-53ED-ADB0-175644B8C612/MeterReading"
+            type="espi-feed/MeterReading"/>
+      <link rel="related"
+            href="https://api.enbridgegas.com/espi/1_1/resource/Subscription/00uslj14zbgyTaiAp697/UsagePoint/647FC2D4-44D0-53ED-ADB0-175644B8C612/UsageSummary"
+            type="espi-feed/UsageSummary"/>
+   </entry>
+   <entry>
+      <content>
+         <espi:UsageSummary>
+            <espi:billingPeriod>
+               <espi:duration>2937600</espi:duration>
+               <espi:start>1776902400</espi:start>
+            </espi:billingPeriod>
+            <espi:billLastPeriod>84870</espi:billLastPeriod>
+            <espi:billToDate>84870</espi:billToDate>
+            <espi:costAdditionalLastPeriod>0</espi:costAdditionalLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>84870</espi:amount>
+               <espi:note>Amount Due</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:note>Due Date</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>0</espi:powerOfTenMultiplier>
+                  <espi:uom>27</espi:uom>
+                  <espi:value>1781740800</espi:value>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:note>Bill Date</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>0</espi:powerOfTenMultiplier>
+                  <espi:uom>27</espi:uom>
+                  <espi:value>1780012800</espi:value>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>9770</espi:amount>
+               <espi:note>HST ($)</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>5</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>17500</espi:amount>
+               <espi:note>Gas Supply Charge</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>2</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>23580</espi:amount>
+               <espi:note>Gas Delivery Variable Charge</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>2</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>0</espi:amount>
+               <espi:note>Gas Federal Carbon Charge</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>5</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:note>Billing Period - Current Read Date</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>0</espi:powerOfTenMultiplier>
+                  <espi:uom>27</espi:uom>
+                  <espi:value>1779840000</espi:value>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:note>Billing Period - Previous Read Date</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>0</espi:powerOfTenMultiplier>
+                  <espi:uom>27</espi:uom>
+                  <espi:value>1776816000</espi:value>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:note>Current Meter Read</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>114</espi:uom>
+                  <espi:value>30591000</espi:value>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:note>Previous Meter Read</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>114</espi:uom>
+                  <espi:value>30420000</espi:value>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:note>Usage (unadjusted)</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>167</espi:uom>
+                  <espi:value>171315</espi:value>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>0</espi:amount>
+               <espi:note>Previous Balance ($)</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>0</espi:amount>
+               <espi:note>Payments Received ($)</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>9</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>0</espi:amount>
+               <espi:note>Balance Forward ($)</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>10750</espi:amount>
+               <espi:note>Gas Transportation Charge ($)</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>2</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>-4420</espi:amount>
+               <espi:note>Gas Cost Adjustment ($)</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>4</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>0</espi:amount>
+               <espi:note>Charges from Other Companies ($)</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>0</espi:amount>
+               <espi:note>Gas Service Provider Admin Fee ($)</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>4</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>17500</espi:amount>
+               <espi:note>Gas Service Provider Supply Charge ($)</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>2</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>84870</espi:amount>
+               <espi:note>Total Gas Charges ($)</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>0</espi:amount>
+               <espi:note>Other Gas Charges ($)</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:note>Adjustment Factor (atmospheric)</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-6</espi:powerOfTenMultiplier>
+                  <espi:uom>114</espi:uom>
+                  <espi:value>1004000</espi:value>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>0</espi:amount>
+               <espi:note>Reversal of Previously billed charges</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>101745</espi:amount>
+               <espi:note>Gas Supply Rate ¢/m3</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-4</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>-29889</espi:amount>
+               <espi:note>Gas Cost Adjustment ¢/m3</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-4</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>71856</espi:amount>
+               <espi:note>Total Gas Supply Rate ¢/m3 (net)</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-4</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>27690</espi:amount>
+               <espi:note>Customer charge</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>0</espi:amount>
+               <espi:note>Hydrogen Blended credit</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>0</espi:amount>
+               <espi:note>Direct Purchase Admin Charge</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>4</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>0</espi:amount>
+               <espi:note>Expansion Surcharge</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:note>Pressure factor</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-14</espi:powerOfTenMultiplier>
+                  <espi:uom>114</espi:uom>
+                  <espi:value>0</espi:value>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:note>Previous Usage consumption</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>167</espi:uom>
+                  <espi:value>0</espi:value>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:note>Number of days in bill period</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>0</espi:powerOfTenMultiplier>
+                  <espi:uom>114</espi:uom>
+                  <espi:value>35</espi:value>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>0</espi:amount>
+               <espi:note>Contract Demand charge</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>0</espi:amount>
+               <espi:note>Load Balancing Charge</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>10</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:costAdditionalDetailLastPeriod>
+               <espi:amount>0</espi:amount>
+               <espi:note>Transportation to Enbridge (LVB)</espi:note>
+               <espi:measurement>
+                  <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+                  <espi:uom>80</espi:uom>
+               </espi:measurement>
+               <espi:itemKind>2</espi:itemKind>
+            </espi:costAdditionalDetailLastPeriod>
+            <espi:currency>124</espi:currency>
+            <espi:overallConsumptionLastPeriod>
+               <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+               <espi:timeStamp>1780288640</espi:timeStamp>
+               <espi:uom>42</espi:uom>
+               <espi:value>0</espi:value>
+            </espi:overallConsumptionLastPeriod>
+            <espi:currentBillingPeriodOverAllConsumption>
+               <espi:powerOfTenMultiplier>-3</espi:powerOfTenMultiplier>
+               <espi:timeStamp>1780288640</espi:timeStamp>
+               <espi:uom>42</espi:uom>
+               <espi:value>172000</espi:value>
+            </espi:currentBillingPeriodOverAllConsumption>
+            <espi:qualityOfReading>19</espi:qualityOfReading>
+            <espi:statusTimeStamp>1780288640</espi:statusTimeStamp>
+         </espi:UsageSummary>
+      </content>
+      <id>urn:uuid:B07E446A-DB3A-5F2A-B166-5C49CEEA60AD</id>
+      <title>Usage Summary</title>
+      <published>2026-06-01T04:37:20Z</published>
+      <updated>2026-06-01T04:37:20Z</updated>
+      <link rel="self"
+            href="https://api.enbridgegas.com/espi/1_1/resource/Subscription/00uslj14zbgyTaiAp697/UsagePoint/647FC2D4-44D0-53ED-ADB0-175644B8C612/UsageSummary/B07E446A-DB3A-5F2A-B166-5C49CEEA60AD"
+            type="espi-entry/UsageSummary"/>
+      <link rel="up"
+            href="https://api.enbridgegas.com/espi/1_1/resource/Subscription/00uslj14zbgyTaiAp697/UsagePoint/647FC2D4-44D0-53ED-ADB0-175644B8C612/UsageSummary"
+            type="espi-feed/UsageSummary"/>
+      <link rel="related"
+            href="https://api.enbridgegas.com/espi/1_1/resource/Subscription/00uslj14zbgyTaiAp697/UsagePoint/647FC2D4-44D0-53ED-ADB0-175644B8C612"
+            type="espi-entry/UsagePoint"/>
+   </entry>
+</feed>
