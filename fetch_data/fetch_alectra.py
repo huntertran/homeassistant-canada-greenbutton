@@ -172,9 +172,8 @@ async def run() -> int:
             if local_copy:
                 Path(local_copy).write_bytes(xml_bytes)
 
-            result = ha_upload.post_xml(xml_bytes, source="alectra")
-            print(f"Uploaded {len(xml_bytes)} bytes → {result.get('path')}")
-
+            # Drive sync runs before the HA upload so an unreachable HA
+            # instance (e.g. tailnet down) does not discard a good scrape.
             if os.environ.get("GDRIVE_REFRESH_TOKEN"):
                 try:
                     from datetime import timezone as _tz
@@ -190,6 +189,13 @@ async def run() -> int:
                     )
                 except Exception as drive_err:  # noqa: BLE001
                     print(f"Drive upload failed (non-fatal): {drive_err}", file=sys.stderr)
+
+            try:
+                result = ha_upload.post_xml(xml_bytes, source="alectra")
+                print(f"Uploaded {len(xml_bytes)} bytes → {result.get('path')}")
+            except Exception as ha_err:  # noqa: BLE001
+                print(f"HA upload failed: {ha_err}", file=sys.stderr)
+                return 1
 
             return 0
 

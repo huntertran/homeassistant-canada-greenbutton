@@ -25,6 +25,14 @@ jobs:
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:gh
 
+      - name: Check tailnet route to HA
+        env:
+          HA_BASE_URL: ${{ secrets.HA_BASE_URL }}
+        run: |
+          host=$(echo "$HA_BASE_URL" | sed -E 's#^https?://##; s#[:/].*$##')
+          sudo tailscale status || true
+          sudo tailscale ping -c 3 --timeout=5s "$host" || echo "::warning::tailscale ping to $host failed"
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

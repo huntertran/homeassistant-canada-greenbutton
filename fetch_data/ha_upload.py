@@ -19,7 +19,9 @@ def post_xml(xml: bytes, *, source: str, base_url: str | None = None, token: str
     last_err: Exception | None = None
     for attempt in range(4):
         try:
-            r = requests.post(url, data=xml, headers=headers, timeout=60)
+            # (connect, read): fail fast when the host is unroutable, but give
+            # HA time to chew through a large XML payload.
+            r = requests.post(url, data=xml, headers=headers, timeout=(10, 120))
             r.raise_for_status()
             return r.json()
         except requests.RequestException as err:
